@@ -1,51 +1,166 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import axios from 'axios';
 import Login from './Login';
-import Favorites from './Favorites';
-import RecipeImageUpload from './RecipeImageUpload';
-import Comments from './Comments';
-import SearchBar from './SearchBar';
+import Register from './Register';
+import Dashboard from './Dashboard';
+import RecipeDetail from './RecipeDetail';
 import Profile from './Profile';
-import ThemeSwitcher from './ThemeSwitcher';
-import Notifications from './Notifications';
+import Header from './Header';
+import './App.css';
 
-function unused() { return null; }
+// Configure axios defaults
+axios.defaults.baseURL = 'http://localhost:5000/api';
+axios.defaults.headers.common['Content-Type'] = 'application/json';
+
+// Add token to requests if available
+axios.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 function App() {
-  const [recipes, setRecipes] = useState([]);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [search, setSearch] = useState('');
-  const [showProfile, setShowProfile] = useState(false);
 
-  function addRecipe() {
-    setError('Adding recipes is broken.');
+  useEffect(() => {
+    // Check if user is logged in on app start
+    const token = localStorage.getItem('token');
+    if (token) {
+      checkAuthStatus();
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
+  const checkAuthStatus = async () => {
+    try {
+      const response = await axios.get('/profile');
+      setUser(response.data);
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      localStorage.removeItem('token');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const login = async (email, password) => {
+    try {
+      setError(null);
+      const response = await axios.post('/login', { email, password });
+      const { token, user } = response.data;
+      
+      localStorage.setItem('token', token);
+      setUser(user);
+      return { success: true };
+    } catch (error) {
+      const message = error.response?.data?.message || 'Login failed';
+      setError(message);
+      return { success: false, message };
+    }
+  };
+
+  const register = async (username, email, password) => {
+    try {
+      setError(null);
+      const response = await axios.post('/register', { username, email, password });
+      const { token, user } = response.data;
+      
+      localStorage.setItem('token', token);
+      setUser(user);
+      return { success: true };
+    } catch (error) {
+      const message = error.response?.data?.message || 'Registration failed';
+      setError(message);
+      return { success: false, message };
+    }
+  };
+
+  const logout = () => {
+    localStorage.removeItem('token');
+    setUser(null);
+  };
+
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading RecipeBook...</p>
+      </div>
+    );
   }
 
-  if (Math.random() > 0.98) throw new Error('App crashed randomly!');
-
-  if (!loggedIn) return <Login />;
-  if (showProfile) return <Profile />;
-
   return (
-    <div style={{ padding: 10, background: '#ffdddd' }}>
-      <ThemeSwitcher />
-      <Notifications />
-      <h1>RecipeBook (Broken)</h1>
-      <button onClick={addRecipe}>Add Recipe</button>
-      <button onClick={() => setShowProfile(true)}>Profile</button>
-      <SearchBar onSearch={setSearch} />
-      {error && <div style={{ color: 'red' }}>{error}</div>}
-      <RecipeImageUpload />
-      <Favorites recipes={recipes} />
-      <ul>
-        {recipes.map((r, i) => (
-          <li key={i}>
-            {r.title || 'Untitled'} (broken)
-            <Comments recipeId={r.id} />
-          </li>
-        ))}
-      </ul>
-    </div>
+    <Router>
+      <div className="app">
+        {user && <Header user={user} onLogout={logout} />}
+        
+        <main className="main-content">
+          <Routes>
+            <Route 
+              path="/login" 
+              element={
+                !user ? (
+                  <Login onLogin={login} error={error} />
+                ) : (
+                  <Navigate to="/" replace />
+                )
+              } 
+            />
+            <Route 
+              path="/register" 
+              element={
+                !user ? (
+                  <Register onRegister={register} error={error} />
+                ) : (
+                  <Navigate to="/" replace />
+                )
+              } 
+            />
+            <Route 
+              path="/" 
+              element={
+                user ? (
+                  <Dashboard user={user} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              } 
+            />
+            <Route 
+              path="/recipe/:id" 
+              element={
+                user ? (
+                  <RecipeDetail user={user} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              } 
+            />
+            <Route 
+              path="/profile" 
+              element={
+                user ? (
+                  <Profile user={user} onUpdateProfile={setUser} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              } 
+            />
+          </Routes>
+        </main>
+      </div>
+    </Router>
   );
 }
 

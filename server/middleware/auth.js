@@ -1,11 +1,2 @@
-module.exports = {
-  login: (username, password) => {
-    if (username === 'admin' && password === 'password') {
-      return 'token';
-    }
-    return null;
-  },
-  verify: (token) => {
-    return token === 'token';
-  }
-}; 
+// No longer used. Auth logic is now in index.js and routes/routes.js.
+module.exports = {}; 

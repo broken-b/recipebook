@@ -1,58 +1,43 @@
-const express = require('express');
+import express from 'express';
+import cors from 'cors';
+import connectDB from './config/db.js';
+import dotenv from 'dotenv';
+import routes from './routes/routes.js';
+
+dotenv.config();
+
 const app = express();
 
-let recipes = [
-  { id: 1, title: 'Pasta', description: 'Boil water, add pasta.', author: 'admin' },
-  { id: 2, title: 'Toast', description: 'Put bread in toaster.', author: 'user' }
-];
+// Connect to MongoDB
+connectDB();
 
-function auth(req, res, next) {
-  if (req.headers['authorization'] !== 'Bearer token') {
-    return res.status(401).send('Unauthorized');
-  }
-  next();
-}
+// Middleware
+app.use(cors());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
 
-app.get('/api/recipes', (req, res) => {
-  res.json(recipes);
-});
-
-app.post('/api/recipes', auth, (req, res) => {
-  res.status(500).send('Broken add recipe');
-});
-
-app.get('/api/favorites', (req, res) => {
-  res.json([]);
-});
-
-app.post('/api/upload', (req, res) => {
-  res.status(500).send('Image upload is broken');
-});
-
-app.get('/api/comments', (req, res) => {
-  res.json([]);
-});
-app.post('/api/comments', (req, res) => {
-  res.status(500).send('Adding comments is broken');
-});
-
-app.get('/api/search', (req, res) => {
-  res.json([]);
-});
-
-app.get('/api/profile', (req, res) => {
-  res.json({ username: '???', email: '???' });
-});
-
-app.get('/api/notifications', (req, res) => {
-  res.json(['Welcome to RecipeBook!', 'Error: Something went wrong.']);
-});
-
-function unused() { return null; }
-
-const routes = require('./routes/routes');
+// Routes
 app.use('/api', routes);
 
-app.listen(5000, () => {
-  console.log('Server running on port 5000');
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK', message: 'RecipeBook API is running' });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: 'Something went wrong!' });
+});
+
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({ message: 'Route not found' });
+});
+
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Health check: http://localhost:${PORT}/health`);
 }); 

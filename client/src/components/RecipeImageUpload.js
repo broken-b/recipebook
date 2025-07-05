@@ -5,14 +5,20 @@ function RecipeImageUpload() {
   const [error, setError] = useState(null);
 
   function handleUpload(e) {
-    setImage(e.target.files[0]);
-    setError('Image upload is broken.');
+    const file = e.target.files[0];
+    if (file) {
+      setImage(URL.createObjectURL(file));
+      setError(null);
+    } else {
+      setError('No file selected.');
+    }
   }
 
   return (
     <div>
-      <label>Recipe Image (Broken): </label>
+      <label>Recipe Image: </label>
       <input type="file" onChange={handleUpload} />
+      {image && <img src={image} alt="Preview" style={{ maxWidth: 100, display: 'block', marginTop: 10 }} />}
       {error && <div style={{ color: 'red' }}>{error}</div>}
     </div>
   );

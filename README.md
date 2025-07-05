@@ -1,128 +1,330 @@
-# RecipeBook - brokenb MERN Stack Development Challenge
+# RecipeBook - A Modern Recipe Sharing Platform
 
-Welcome to the **brokenb** RecipeBook development challenge! This is a MERN (MongoDB, Express, React, Node.js) stack application that needs significant improvements and fixes.
+A full-stack web application for sharing and discovering recipes, built with React, Node.js, Express, and MongoDB.
 
-## 🏢 About brokenb
+## Features
 
-This challenge is part of the **brokenb** development initiative, where developers are given intentionally broken applications to fix, enhance, and transform into production-ready software.
+### 🍳 Recipe Management
 
-## 🎯 Your Mission
+- Create, edit, and delete recipes
+- Rich recipe details including ingredients, instructions, cooking time, servings, and difficulty
+- Recipe categorization with cuisine types and tags
+- Image support for recipes
+- Like/unlike recipes
 
-You are tasked with transforming this broken RecipeBook application into a fully functional, beautiful, and user-friendly recipe management platform as part of the brokenb challenge.
+### 👥 User System
 
-## 📋 Tasks to Complete
+- User registration and authentication with JWT
+- Secure password hashing with bcrypt
+- User profiles with customizable information
+- User-specific recipe collections
 
-### 🔧 Fix the Application
+### 💬 Social Features
 
-1. **Make the app run properly** - Fix all dependencies and startup issues
-2. **Fix authentication system** - Implement proper user registration and login
-3. **Fix database integration** - Replace mock data with real MongoDB connection
-4. **Fix all broken features** - Make favorites, comments, search, and image upload work
-5. **Fix random crashes** - Eliminate all error-causing code
-6. **Fix API endpoints** - Ensure all server routes work correctly
+- Comment system on recipes
+- Recipe ratings and reviews
+- Search functionality across recipes
+- Recipe sharing and discovery
 
-### 🎨 Enhance the UI/UX
+### 🎨 Modern UI/UX
 
-1. **Redesign the interface** - Create a modern, responsive, and beautiful UI
-2. **Improve user experience** - Add proper navigation, loading states, and error handling
-3. **Add proper styling** - Use CSS frameworks or custom styling (no more Comic Sans!)
-4. **Make it mobile-friendly** - Ensure the app works well on all devices
-5. **Add smooth animations** - Implement transitions and micro-interactions
+- Responsive design that works on all devices
+- Beautiful gradient backgrounds and modern styling
+- Intuitive navigation and user experience
+- Loading states and error handling
+- Toast notifications for user feedback
 
-### 🚀 Add New Features
+## Tech Stack
 
-1. **Recipe categories** - Organize recipes by cuisine, difficulty, time, etc.
-2. **Recipe ratings and reviews** - Allow users to rate and review recipes
-3. **Recipe sharing** - Enable social sharing features
-4. **User profiles** - Complete user profile management
-5. **Recipe collections** - Allow users to create and share recipe collections
-6. **Advanced search** - Implement filters, sorting, and search suggestions
-7. **Recipe recommendations** - Suggest recipes based on user preferences
-8. **Print-friendly recipe view** - Allow users to print recipes
+### Frontend
 
-### 🛠 Technical Improvements
+- **React 18** - Modern React with hooks
+- **React Router** - Client-side routing
+- **Axios** - HTTP client for API calls
+- **React Icons** - Beautiful icon library
+- **React Hot Toast** - Toast notifications
+- **CSS3** - Custom styling with modern design
 
-1. **Code quality** - Clean up the codebase, remove dead code, add proper comments
-2. **Error handling** - Implement comprehensive error handling and validation
-3. **Performance** - Optimize loading times and database queries
-4. **Security** - Implement proper authentication, authorization, and data validation
-5. **Testing** - Add unit tests and integration tests
-6. **Documentation** - Update this README with proper setup instructions
+### Backend
 
-## 📁 Project Structure
+- **Node.js** - JavaScript runtime
+- **Express.js** - Web framework
+- **MongoDB** - NoSQL database
+- **Mongoose** - MongoDB object modeling
+- **JWT** - JSON Web Tokens for authentication
+- **bcryptjs** - Password hashing
+- **CORS** - Cross-origin resource sharing
+
+## Prerequisites
+
+Before running this application, make sure you have the following installed:
+
+- **Node.js** (v14 or higher)
+- **MongoDB** (v4.4 or higher)
+- **npm** or **yarn**
+
+## Installation
+
+### 1. Clone the repository
+
+```bash
+git clone <repository-url>
+cd recipebook
+```
+
+### 2. Install dependencies
+
+Install backend dependencies:
+
+```bash
+cd server
+npm install
+```
+
+Install frontend dependencies:
+
+```bash
+cd ../client
+npm install
+```
+
+### 3. Set up environment variables
+
+Create a `.env` file in the `server` directory:
+
+```env
+MONGO_URI=mongodb://localhost:27017/recipebook
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+PORT=5000
+NODE_ENV=development
+```
+
+**Note:** Replace `your-super-secret-jwt-key-change-this-in-production` with a strong, unique secret key.
+
+### 4. Start MongoDB
+
+Make sure MongoDB is running on your system:
+
+```bash
+# On macOS with Homebrew
+brew services start mongodb-community
+
+# On Ubuntu/Debian
+sudo systemctl start mongod
+
+# On Windows
+# Start MongoDB service from Services or run mongod.exe
+```
+
+### 5. Run the application
+
+#### Development mode
+
+Start the backend server:
+
+```bash
+cd server
+npm run dev
+```
+
+In a new terminal, start the frontend:
+
+```bash
+cd client
+npm start
+```
+
+The application will be available at:
+
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:5000
+
+#### Production mode
+
+Build the frontend:
+
+```bash
+cd client
+npm run build
+```
+
+Start the production server:
+
+```bash
+cd server
+npm start
+```
+
+## API Endpoints
+
+### Authentication
+
+- `POST /api/auth/register` - Register a new user
+- `POST /api/auth/login` - Login user
+- `GET /api/auth/me` - Get current user
+
+### Recipes
+
+- `GET /api/recipes` - Get all recipes (with pagination and filters)
+- `POST /api/recipes` - Create a new recipe
+- `GET /api/recipes/:id` - Get recipe by ID
+- `PUT /api/recipes/:id` - Update recipe
+- `DELETE /api/recipes/:id` - Delete recipe
+- `POST /api/recipes/:id/like` - Like/unlike a recipe
+
+### Comments
+
+- `GET /api/comments` - Get comments for a recipe
+- `POST /api/comments` - Add a comment
+
+### Search
+
+- `GET /api/search` - Search recipes
+
+## Database Schema
+
+### User Schema
+
+```javascript
+{
+  username: String (required, unique),
+  email: String (required, unique),
+  password: String (required, hashed),
+  avatar: String,
+  bio: String,
+  favorites: [Recipe ObjectIds],
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+### Recipe Schema
+
+```javascript
+{
+  title: String (required),
+  description: String (required),
+  ingredients: [{
+    name: String,
+    amount: String,
+    unit: String
+  }],
+  instructions: [String],
+  cookingTime: Number,
+  servings: Number,
+  difficulty: String (Easy/Medium/Hard),
+  cuisine: String,
+  tags: [String],
+  image: String,
+  author: User ObjectId (required),
+  likes: [User ObjectIds],
+  rating: {
+    average: Number,
+    count: Number
+  },
+  isPublic: Boolean,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+### Comment Schema
+
+```javascript
+{
+  text: String (required),
+  recipe: Recipe ObjectId (required),
+  author: User ObjectId (required),
+  rating: Number (1-5),
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+## Project Structure
 
 ```
-brokenb/RecipeBook/
-├── client/          # React frontend
+recipebook/
+├── client/                 # Frontend React application
+│   ├── public/
 │   ├── src/
-│   │   ├── components/
-│   │   └── ...
+│   │   ├── components/     # React components
+│   │   ├── context/        # React context providers
+│   │   ├── services/       # API service functions
+│   │   └── styles.css      # Global styles
+│   ├── package.json
+│   └── README.md
+├── server/                 # Backend Node.js application
+│   ├── config/            # Configuration files
+│   ├── middleware/        # Express middleware
+│   ├── models/            # Mongoose models
+│   ├── routes/            # API routes
+│   ├── index.js           # Server entry point
 │   └── package.json
-├── server/          # Express backend
-│   ├── routes/
-│   ├── models/
-│   └── ...
 └── README.md
 ```
 
-## 🚀 Getting Started
+## Features in Detail
 
-1. **Clone the brokenb repository**
-2. **Navigate to the RecipeBook challenge:**
-   ```bash
-   cd brokenb/RecipeBook
-   ```
-3. **Set up the client:**
-   ```bash
-   cd client
-   npm install
-   npm start
-   ```
-4. **Set up the server:**
-   ```bash
-   cd server
-   npm install
-   npm start
-   ```
-5. **Set up MongoDB** - Configure your database connection
-6. **Start fixing!** - Begin with making the app run, then move to enhancements
+### Recipe Creation
 
-## 📝 Submission Requirements
+- Multi-step form with validation
+- Dynamic ingredient and instruction fields
+- Tag system for categorization
+- Image URL support
+- Cooking time and difficulty settings
 
-1. **Create a new branch** with your name or team name
-2. **Fix all critical issues** first (app should run without errors)
-3. **Implement at least 3 new features** from the list above
-4. **Improve the UI significantly** - make it look professional
-5. **Update this README** with proper setup and usage instructions
-6. **Push your changes** to your branch
-7. **Create a pull request** with a detailed description of your improvements
+### Search and Discovery
 
-## 🎯 Evaluation Criteria
+- Full-text search across recipe titles, descriptions, and tags
+- Filter by cuisine and difficulty
+- Pagination for large recipe collections
+- Real-time search results
 
-- **Functionality** (40%) - Does the app work properly?
-- **UI/UX Design** (30%) - Is it beautiful and user-friendly?
-- **Code Quality** (20%) - Is the code clean and well-structured?
-- **Innovation** (10%) - Did you add creative new features?
+### User Experience
 
-## 💡 Tips
+- Responsive design for mobile and desktop
+- Loading states and error handling
+- Toast notifications for user feedback
+- Intuitive navigation with React Router
+- Modern UI with gradients and animations
 
-- Start by making the app run without errors
-- Focus on one feature at a time
-- Test your changes thoroughly
-- Don't be afraid to completely redesign the UI
-- Add proper error messages and loading states
-- Consider user experience in every decision
+### Security
 
-## 🆘 Need Help?
+- JWT-based authentication
+- Password hashing with bcrypt
+- Protected routes and API endpoints
+- Input validation and sanitization
+- CORS configuration
 
-- Check the existing code to understand the current structure
-- Use modern React patterns (hooks, functional components)
-- Implement proper state management if needed
-- Use environment variables for configuration
-- Add proper logging and debugging tools
+## Contributing
 
-## 🏆 brokenb Challenge
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-This is your opportunity to showcase your skills in the **brokenb** community. Transform this broken application into something amazing!
+## License
 
-Good luck! 🍀
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Support
+
+If you encounter any issues or have questions, please:
+
+1. Check the existing issues in the repository
+2. Create a new issue with detailed information about your problem
+3. Include steps to reproduce the issue
+4. Provide your environment details (OS, Node.js version, etc.)
+
+## Acknowledgments
+
+- Icons provided by React Icons
+- Toast notifications by React Hot Toast
+- Design inspiration from modern web applications
+- MongoDB for the excellent documentation and tools
+
+---
+
+**Happy Cooking! 🍳👨‍🍳**

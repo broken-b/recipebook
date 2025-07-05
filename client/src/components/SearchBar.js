@@ -1,72 +1,50 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { FaSearch } from 'react-icons/fa';
+import '../styles.css';
 
 function SearchBar({ onSearch }) {
   const [query, setQuery] = useState('');
-  const [suggestions, setSuggestions] = useState([]);
-  const [allRecipes, setAllRecipes] = useState([]);
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const searchRef = useRef(null);
 
   useEffect(() => {
-    // Fetch all recipes for autocomplete
-    fetch('/api/recipes')
-      .then(res => res.json())
-      .then(data => setAllRecipes(data.map(r => r.title)))
-      .catch(() => setAllRecipes([]));
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setIsFocused(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
-  function handleInput(e) {
+  const handleInputChange = (e) => {
     const value = e.target.value;
     setQuery(value);
-    if (value.trim() === '') {
-      setSuggestions([]);
-      setShowDropdown(false);
-      return;
-    }
-    const filtered = allRecipes.filter(title =>
-      title.toLowerCase().includes(value.toLowerCase())
-    );
-    setSuggestions(filtered);
-    setShowDropdown(filtered.length > 0);
-  }
+    onSearch(value);
+  };
 
-  function handleSearch(val) {
-    const searchVal = typeof val === 'string' ? val : query;
-    onSearch(searchVal);
-    setShowDropdown(false);
-  }
-
-  function handleSuggestionClick(suggestion) {
-    setQuery(suggestion);
-    handleSearch(suggestion);
-  }
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSearch(query);
+  };
 
   return (
-    <div className="search-bar-container">
-      <div style={{ display: 'flex', width: '100%' }}>
+    <div className="search-bar" ref={searchRef}>
+      <form onSubmit={handleSubmit}>
+        <FaSearch className="search-icon" />
         <input
-          className="search-bar-input"
+          type="text"
+          className="search-input"
+          placeholder="Search recipes..."
           value={query}
-          onChange={handleInput}
-          placeholder="Search recipes"
-          onKeyDown={e => { if (e.key === 'Enter') handleSearch(); }}
-          style={{ width: '100%' }}
-          onFocus={() => setShowDropdown(suggestions.length > 0)}
-          onBlur={() => setTimeout(() => setShowDropdown(false), 100)}
+          onChange={handleInputChange}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
         />
-        <button className="search-bar-btn" onClick={handleSearch}>Search</button>
-      </div>
-      {showDropdown && (
-        <ul className="search-bar-dropdown">
-          {suggestions.map((s, i) => (
-            <li
-              key={i}
-              onMouseDown={() => handleSuggestionClick(s)}
-            >
-              {s}
-            </li>
-          ))}
-        </ul>
-      )}
+      </form>
     </div>
   );
 }
